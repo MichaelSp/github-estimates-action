@@ -4,14 +4,14 @@ author: 'Mathias Lynnerup Jakobsen'
 branding:
   color: 'green'
   icon: 'clock'
-  
+
 inputs:
   token:
     description: 'GitHub repository token ($GITHUB_TOKEN)'
-    requried: true
+    required: true
   owner:
     description: 'GitHub user or organisation'
-    requried: true
+    required: true
   repo:
     description: 'GitHub repository name'
     required: true

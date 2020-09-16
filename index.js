@@ -1,62 +1,65 @@
 const core = require('@actions/core')
-const github = require('@actions/github')
-const { Octokit } = require("@octokit/rest")
+// const github = require('@actions/github')
+const {Octokit} = require("@octokit/rest")
+const {graphql} = require("@octokit/graphql")
 
-try {
-    const token = core.getInput('token')
-    const owner = core.getInput('owner')
-    const repo = core.getInput('repo')
+const QUERY = `
+        query($owner:String! $repo:String!) { 
+            repository(owner:$owner, name:$repo) { 
+                projects(first:100 states:OPEN) { totalCount, 
+                    pageInfo { hasNextPage endCursor } 
+                    nodes { columns(first:40) { totalCount 
+                        nodes { databaseId name cards(first:100 archivedStates:NOT_ARCHIVED) { totalCount 
+                            nodes { content { __typename ... on Issue{ title } ... on PullRequest{ title }
+        }}}}}}}}}`
 
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
-    console.log(`The event payload: ${payload}`)
 
+// const payload = JSON.stringify(github.context.payload, undefined, 2)
+//console.log(`The event payload: ${payload}`)
 
-    const octokit = new Octokit({
-        auth: token,
-        previews: ["inertia-preview"]
-    })
+new Promise(async (resolve,reject) => {
 
-    octokit.paginate("GET /repos/:owner/:repo/projects", { owner, repo }).then((projects) => (
-        projects.map((project) => (
-            octokit.paginate(project.columns_url).then((columns) => (
-                columns.map((column) => {
-                    octokit.paginate(column.cards_url).then((cards) => (
-                        Promise.all(cards.map((card) => (
-                            octokit.issues.listLabelsOnIssue({
-                                owner,
-                                repo,
-                                issue_number: /[^/]*$/.exec(card.content_url)[0]
-                            }).then(({ data: labels }) => {
-                                let total = 0
+    try {
+        const token = core.getInput('token')
+        const owner = core.getInput('owner')
+        const repo = core.getInput('repo')
 
-                                labels.filter((l) => l.description = 'Story Point').map((l) => {
-                                    total = total + parseInt(l.name)
-                                })
+        const octokit = new Octokit({
+            auth: token,
+            previews: ["inertia-preview"]
+        })
 
-                                return total
-                            }).catch((e) => core.setFailed(e.message))
-                        ))).then((estimates) => {
+        const response = await graphql({
+            query: QUERY,
+            owner: owner,
+            repo: repo,
+            headers: {
+                authorization: `token ${token}`
+            }
+        })
 
-                            let name = ''
-                            const columnTotal = estimates.reduce((a, b) => a + b, 0)
-                            const numStringRegex = /\([0-9]+\)/gi
+        for (const project of response.repository.projects.nodes) {
+            for (const column of project.columns.nodes) {
+                let {databaseId: column_id, name, cards: {nodes: cards}} = column
+                let sum = cards.map((card) => {
+                    let title = card.content ? card.content.title : false
+                    let estimate = title ? card.content.title.match(/^\[(\d+)]/) : false
+                    return estimate ? parseInt(estimate[1]) || 0 : 0
+                }).reduce((a, b) => a + b, 0)
 
-                            if (column.name.search(numStringRegex) === -1) {
-                                name = `${column.name} (${columnTotal})`
-                            } else {
-                                name = column.name.replace(numStringRegex, `(${columnTotal})`)
-                            }
+                const regex = /\[[0-9]+]/gi
+                name = (name.search(regex) === -1)
+                    ? `${name} [${sum}]`
+                    : name.replace(regex, `[${sum}]`)
 
-                            octokit.projects.updateColumn({
-                                column_id: column.id,
-                                name,
-                            })
-                        }).catch((e) => core.setFailed(e.message))
-                    )).catch((e) => core.setFailed(e.message))
-                })
-            )).catch((e) => core.setFailed(e.message))
-        ))
-    ))
-} catch (error) {
-    core.setFailed(error.message)
-}
+                octokit.projects.updateColumn({column_id, name}).catch(reject)
+            }
+        }
+
+        resolve()
+    } catch (e) {
+        reject(e)
+    }
+}).catch((err) => {
+    core.setFailed(err.message)
+})

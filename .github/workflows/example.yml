@@ -11,15 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Update project column estimates
     steps:
-      - uses: actions/checkout@v1
-        
-      - name: Update dependencies
-        run: npm install
-
       - name: Use API to calculate and update total estimates in each column
         id: run
-        uses: ./
+        uses: emiliopedrollo/github-estimates-action@master
         with:
-          owner: 'mathiasjakobsen'
+          owner: 'emiliopedrollo'
           repo: 'github-estimates-action'
           token: ${{ secrets.GITHUB_TOKEN }}
