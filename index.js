@@ -10,7 +10,7 @@ const QUERY = `
                     pageInfo { hasNextPage endCursor } 
                     nodes { columns(first:40) { totalCount 
                         nodes { databaseId name cards(first:100 archivedStates:NOT_ARCHIVED) { totalCount 
-                            nodes { content { __typename ... on Issue{ title } ... on PullRequest{ title }
+                            nodes { note content { __typename ... on Issue{ title } ... on PullRequest{ title }
         }}}}}}}}}`
 
 new Promise(async (resolve,reject) => {
@@ -46,7 +46,7 @@ new Promise(async (resolve,reject) => {
                 let {databaseId: column_id, name, cards: {nodes: cards}} = column
                 let sum = cards.map((card) => {
                     console.log(card.content)
-                    let title = card.content ? (card.content.title ? card.content.title : card.content.notes) : false
+                    let title = card.content ? card.content.title : card.note
                     let estimate = title ? card.content.title.match(/^\[(\d+)]/) : false
                     return estimate ? parseInt(estimate[1]) || 0 : 0
                 }).reduce((a, b) => a + b, 0)

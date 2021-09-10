@@ -1,10 +1,12 @@
 name: Update project estimates
 
 on:
-  issues:
-    types: [edited, opened, deleted]
+  project:
+    types: [created]
   project_card:
-    types: [moved, created, deleted]
+    types: [moved, created, edited, deleted]
+  project_column:
+    types: [created]
 
 jobs:
   test:
