@@ -47,6 +47,7 @@ new Promise(async (resolve,reject) => {
                     return estimate ? parseInt(estimate[1]) || 0 : 0
                 }).reduce((a, b) => a + b, 0)
 
+                console.log(name, sum)
                 const regex = /\[[0-9]+]/gi
                 name = (name.search(regex) === -1)
                     ? `${name} [${sum}]`
