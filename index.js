@@ -1,5 +1,5 @@
 const core = require('@actions/core')
-// const github = require('@actions/github')
+const github = require('@actions/github')
 const {Octokit} = require("@octokit/rest")
 const {graphql} = require("@octokit/graphql")
 
@@ -14,15 +14,13 @@ const QUERY = `
         }}}}}}}}}`
 
 
-// const payload = JSON.stringify(github.context.payload, undefined, 2)
-//console.log(`The event payload: ${payload}`)
+const payload = JSON.stringify(github.context.payload, undefined, 2)
+console.log(`The event payload: ${payload}`)
 
 new Promise(async (resolve,reject) => {
 
     try {
         const token = core.getInput('token')
-        const owner = core.getInput('owner')
-        const repo = core.getInput('repo')
 
         const octokit = new Octokit({
             auth: token,

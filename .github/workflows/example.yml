@@ -15,6 +15,4 @@ jobs:
         id: run
         uses: emiliopedrollo/github-estimates-action@master
         with:
-          owner: 'emiliopedrollo'
-          repo: 'github-estimates-action'
           token: ${{ secrets.GITHUB_TOKEN }}

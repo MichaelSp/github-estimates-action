@@ -9,12 +9,6 @@ inputs:
   token:
     description: 'GitHub repository token ($GITHUB_TOKEN)'
     required: true
-  owner:
-    description: 'GitHub user or organisation'
-    required: true
-  repo:
-    description: 'GitHub repository name'
-    required: true
 runs:
   using: 'node12'
   main: 'index.js'
