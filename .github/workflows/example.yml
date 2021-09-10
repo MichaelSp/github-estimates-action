@@ -1,6 +1,10 @@
 name: Update project estimates
 
 on:
+  issues:
+    types: [edited, opened, deleted]
+  pull_request:
+    types: [edited, opened]
   project:
     types: [created]
   project_card:
