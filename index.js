@@ -13,10 +13,6 @@ const QUERY = `
                             nodes { content { __typename ... on Issue{ title } ... on PullRequest{ title }
         }}}}}}}}}`
 
-
-const payload = JSON.stringify(github.context.payload, undefined, 2)
-console.log(`The event payload: ${payload}`)
-
 new Promise(async (resolve,reject) => {
 
     try {
@@ -26,6 +22,15 @@ new Promise(async (resolve,reject) => {
             auth: token,
             previews: ["inertia-preview"]
         })
+
+        const {
+            repository: {
+                name: repo,
+                owner: {
+                    login: owner
+                }
+            }
+        } = github.context.payload
 
         const response = await graphql({
             query: QUERY,

@@ -2,9 +2,9 @@ name: Update project estimates
 
 on:
   issues:
-    types: [labeled, unlabeled]
+    types: [edited, opened, deleted]
   project_card:
-    types: [moved, created]
+    types: [moved, created, deleted]
 
 jobs:
   test:
