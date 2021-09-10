@@ -45,9 +45,8 @@ new Promise(async (resolve,reject) => {
             for (const column of project.columns.nodes) {
                 let {databaseId: column_id, name, cards: {nodes: cards}} = column
                 let sum = cards.map((card) => {
-                    console.log(card.content)
                     let title = card.content ? card.content.title : card.note
-                    let estimate = title ? card.content.title.match(/^\[(\d+)]/) : false
+                    let estimate = title ? title.match(/^\[(\d+)]/) : false
                     return estimate ? parseInt(estimate[1]) || 0 : 0
                 }).reduce((a, b) => a + b, 0)
 
