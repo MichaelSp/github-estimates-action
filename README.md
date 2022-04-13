@@ -15,8 +15,6 @@ Project **must** have one or more labels with a description named "Story Point" 
 ## Inputs
 
 - `token` **(required)** GitHub repository token (`$GITHUB_TOKEN`)
-- `owner` **(required)** GitHub user or organisation.
-- `repo` **(required)** GitHub repository name.
 
 ## Usage
 
